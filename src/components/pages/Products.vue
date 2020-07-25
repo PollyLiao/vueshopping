@@ -218,7 +218,7 @@ export default {
   },
   methods: {
     getProducts() {
-      const api = "https://vue-course-api.hexschool.io/api/madeindeer/products";
+      const api = "https://vue-course-api.hexschool.io/api/polly777/products";
       const vm = this;
       vm.$http.get(api).then((respose) => {
         vm.products = respose.data.products;
@@ -230,17 +230,17 @@ export default {
         this.isNew = true;
       } else {
         this.tempProduct = Object.assign({}, item);
+        this.isNew = false
       }
       $("#productModal").modal("show");
     },
-    updateProduct(isNew) {
-      let api =
-        "https://vue-course-api.hexschool.io/api/madeindeer/admin/product";
+    updateProduct() {
+      let api ="https://vue-course-api.hexschool.io/api/polly777/admin/product";
       const vm = this;
       let httpMethods = "post";
 
-      if (!isNew) {
-        api = `https://vue-course-api.hexschool.io/api/madeindeer/admin/product/:${vm.tempProduct.id}`;
+      if (!vm.isNew) {
+        api = `https://vue-course-api.hexschool.io/api/polly777/admin/product/${vm.tempProduct.id}`;
         httpMethods = "put";
       }
 
@@ -262,9 +262,18 @@ export default {
     },
     deletProduct() {
       const vm = this;
-      const api = `https://vue-course-api.hexschool.io/api/madeindeer/admin/product/:${vm.tempProduct.id}`;
+      const api = `https://vue-course-api.hexschool.io/api/polly777/admin/product/${vm.tempProduct.id}`;
+      console.log(api)
       vm.$http.delete(api).then((response) => {
-        console.log(response.data);
+        console.log(response)
+        if(response.data.success){
+          $('#delProductModal').modal('hide')
+          vm.getProducts();
+        }else{
+          $('#delProductModal').modal('hide')
+          vm.getProducts();
+          console.log('刪除失敗')
+        }
       });
     },
   },
