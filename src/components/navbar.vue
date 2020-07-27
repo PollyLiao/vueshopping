@@ -37,7 +37,7 @@ export default {
   },
   methods: {
     signout(){
-      const api = 'https://vue-course-api.hexschool.io/logout';
+      const api = 'https://vue-course-api.hexschool.io/admin/logout';
       const vm = this;
       vm.$http.post(api).then((response)=>{
         if(response.data.success){

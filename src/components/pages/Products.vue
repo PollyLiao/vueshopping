@@ -1,5 +1,6 @@
 <template >
   <div>
+    <loading :active.sync="isLoading"></loading>
     <div class="text-right mt-4">
       <button class="btn btn-primary" @click="openModal(true)">建立新產品</button>
     </div>
@@ -55,20 +56,19 @@
               <div class="col-sm-4">
                 <div class="form-group">
                   <label for="image">輸入圖片網址</label>
-                  <input type="text" class="form-control" id="image" placeholder="請輸入圖片連結" />
+                  <input type="text" class="form-control" id="image" placeholder="請輸入圖片連結" v-model="tempProduct.imageUrl"/>
                 </div>
                 <div class="form-group">
                   <label for="customFile">
                     或 上傳圖片
-                    <i class="fas fa-spinner fa-spin"></i>
+                    <i class="fas fa-spinner fa-pulse" v-if="status.fileUploading"></i>
                   </label>
-                  <input type="file" id="customFile" class="form-control" ref="files" />
+                  <input type="file" id="customFile" class="form-control" ref="files" @change="uploadFile" />
                 </div>
                 <img
-                  img="https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=828346ed697837ce808cae68d3ddc3cf&auto=format&fit=crop&w=1350&q=80"
                   class="img-fluid"
                   alt
-                />
+                  :src="tempProduct.imageUrl" />
               </div>
               <div class="col-sm-8">
                 <div class="form-group">
@@ -214,14 +214,21 @@ export default {
       products: [],
       tempProduct: {},
       isNew: false,
+      isLoading:false,
+      status:{
+        fileUploading:false
+      }
     };
   },
   methods: {
     getProducts() {
-      const api = "https://vue-course-api.hexschool.io/api/polly777/products";
+      const api = "https://vue-course-api.hexschool.io/api/polly777/admin/products";
       const vm = this;
+      vm.isLoading = true
       vm.$http.get(api).then((respose) => {
         vm.products = respose.data.products;
+        console.log(respose)
+        vm.isLoading = false
       });
     },
     openModal(isNew, item) {
@@ -276,9 +283,34 @@ export default {
         }
       });
     },
+    uploadFile(){
+      console.log(this)
+      const uploadedFile = this.$refs.files.files[0]
+      const vm = this
+      const formData = new FormData()
+      formData.append('file-to-upload',uploadedFile)
+      const api  = `https://vue-course-api.hexschool.io/api/polly777/admin/upload`;
+      vm.status.fileUploading = true
+      vm.$http.post(api, formData, {
+        headers:{
+          'Content-Type':'multipart/form-data'
+        }
+      }).then((response)=>{
+        console.log(response)
+        vm.status.fileUploading = false
+        if(response.data.success){
+          //vm.tempProduct.imageUrl = response.data.imageUrl
+          //console.log(vm.tempProduct)
+          vm.$set(vm.tempProduct,'imageUrl',response.data.imageUrl)
+        }else{
+          vm.$bus.$emit('message:push',response.data.message,'danger')
+        }
+      })
+    }
   },
   created() {
     this.getProducts();
+    //this.$bus.$emit('message:push','QQQQ','danger')
   },
 };
 </script>
